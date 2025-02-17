@@ -12,7 +12,7 @@ module.exports = async function (req) {
   const storage = new sdk.Storage(client);
 
   try {
-    // Step 1: Retrieve the uploaded file from Appwrite Storage
+    // Retrieve the uploaded file
     const fileId = req.payload.$fileId;
     const file = await storage.getFileView(
       process.env.APPWRITE_CERTIFICATE_BUCKET,
@@ -21,20 +21,47 @@ module.exports = async function (req) {
 
     const fileBuffer = Buffer.from(await file.arrayBuffer());
 
-    // Step 2: Process the PDF
+    // Process the PDF
     const pdfDoc = await PDFDocument.load(fileBuffer);
     const pages = pdfDoc.getPages();
-    const font = await pdfDoc.embedFont(PDFDocument.Font.Helvetica);
+    const helveticaFont = await pdfDoc.embedFont(PDFDocument.Font.Helvetica);
 
     for (const page of pages) {
-      const certificateId = `CERT-${Date.now()}`;
-      const qrCodeDataUrl = await QRCode.toDataURL(certificateId);
-
-      page.drawText(certificateId, { x: 500, y: 50, size: 12, font });
-      // QR Code embedding logic should use a PNG, not directly the DataURL
+      const { width, height } = page.getSize();
+      
+      // Generate unique certificate ID
+      const certificateId = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Generate QR code
+      const qrCodeDataUrl = await QRCode.toDataURL(certificateId, {
+        errorCorrectionLevel: 'H',
+        margin: 1,
+        width: 100
+      });
+      
+      // Convert QR code data URL to PNG image
+      const qrCodeImage = await pdfDoc.embedPng(
+        Buffer.from(qrCodeDataUrl.split(',')[1], 'base64')
+      );
+      
+      // Add certificate ID text
+      page.drawText(certificateId, {
+        x: width - 200,
+        y: 50,
+        size: 12,
+        font: helveticaFont
+      });
+      
+      // Add QR code
+      page.drawImage(qrCodeImage, {
+        x: width - 120,
+        y: 70,
+        width: 100,
+        height: 100
+      });
     }
 
-    // Step 4: Save and upload the modified PDF
+    // Save and upload modified PDF
     const modifiedPdfBytes = await pdfDoc.save();
     const modifiedPdfBuffer = Buffer.from(modifiedPdfBytes);
 
@@ -44,14 +71,21 @@ module.exports = async function (req) {
       modifiedPdfBuffer
     );
 
-    const modifiedFileUrl = `https://cloud.appwrite.io/v1/storage/buckets/${process.env.APPWRITE_MODIFIED_BUCKET}/files/${modifiedPdfFile.$id}/view`;
+    const downloadUrl = storage.getFileView(
+      process.env.APPWRITE_MODIFIED_BUCKET,
+      modifiedPdfFile.$id
+    );
 
     return {
       success: true,
-      downloadUrl: modifiedFileUrl,
+      downloadUrl: downloadUrl.href,
+      message: 'Certificate processed successfully'
     };
   } catch (error) {
-    console.error("Error:", error);
-    return { success: false, error: "Failed to process PDF" };
+    console.error("Error processing certificate:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to process PDF"
+    };
   }
 };
