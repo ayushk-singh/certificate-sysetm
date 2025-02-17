@@ -1,8 +1,8 @@
-const sdk = require("node-appwrite"); // Correctly import Appwrite SDK
-const { PDFDocument } = require("pdf-lib");
-const QRCode = require("qrcode");
+import sdk from "node-appwrite"; // Correctly import Appwrite SDK
+import { PDFDocument } from "pdf-lib";
+import {QRCode} from "qrcode";
 
-module.exports.main = async (req, res) => {
+export default async (req, res) => {
   const client = new sdk.Client();
   client
     .setEndpoint(process.env.APPWRITE_HOSTNAME) // Ensure env variables are set
