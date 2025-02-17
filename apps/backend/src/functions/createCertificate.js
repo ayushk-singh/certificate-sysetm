@@ -1,21 +1,21 @@
-const sdk = require("node-appwrite"); // ✅ Use require for CommonJS modules
+const sdk = require("node-appwrite");
 const { PDFDocument } = require("pdf-lib");
 const QRCode = require("qrcode");
 
-module.exports.main = async (req, res) => {
+module.exports = async function (req, res) {
   const client = new sdk.Client();
   client
-    .setEndpoint(process.env.APPWRITE_HOSTNAME) // Ensure this is correctly set
+    .setEndpoint(process.env.APPWRITE_HOSTNAME)
     .setProject(process.env.APPWRITE_PROJECT_ID)
     .setKey(process.env.APPWRITE_API_KEY);
 
-  const storage = new sdk.Storage(client); // ✅ Correctly instantiate Storage
+  const storage = new sdk.Storage(client);
 
   try {
     // Step 1: Retrieve the uploaded file from Appwrite Storage
     const fileId = req.payload.$fileId;
     const file = await storage.getFileView(
-      process.env.APPWRITE_CERTIFICATE_BUCKET, 
+      process.env.APPWRITE_CERTIFICATE_BUCKET,
       fileId
     );
 
