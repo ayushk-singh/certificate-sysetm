@@ -1,9 +1,9 @@
-import { sdk, Storage } from "node-appwrite";
-import { PDFDocument } from "pdf-lib";
-import QRCode from "qrcode";
+const { client, storage } = require('../utils/appwrite'); // Use CommonJS require
+const { PDFDocument } = require('pdf-lib');
+const QRCode = require('qrcode');
 
 // Define the function to create the certificate
-export default async function (req, res) {
+module.exports.main = async (req, res) =>  {
   const client = new sdk.Client();
   client
     .setEndpoint(process.env.APPWRITE_HOSTNAME)
