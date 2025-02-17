@@ -16,7 +16,10 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.10.1"
+    "mongoose": "^8.10.1",
+    "node-appwrite": "^15.0.0",
+    "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

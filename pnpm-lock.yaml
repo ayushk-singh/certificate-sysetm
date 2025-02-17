@@ -35,6 +35,15 @@ importers:
       mongoose:
         specifier: ^8.10.1
         version: 8.10.1(socks@2.8.3)
+      node-appwrite:
+        specifier: ^15.0.0
+        version: 15.0.0
+      pdf-lib:
+        specifier: ^1.17.1
+        version: 1.17.1
+      qrcode:
+        specifier: ^1.5.4
+        version: 1.5.4
     devDependencies:
       nodemon:
         specifier: ^3.1.9
@@ -2579,6 +2588,12 @@ packages:
 
   no-case@2.3.2:
     resolution: {integrity: sha512-rmTZ9kz+f3rCvK2TD1Ue/oZlns7OGoIWP4fc3llxxRXlOkHKoWPPWJOfFYpITabSow43QJbRIoHQXtt10VldyQ==}
+
+  node-appwrite@15.0.0:
+    resolution: {integrity: sha512-ysyFGKnT/vSJHNSfikg/RaOXghv8rdHNUznVMENm7AS7yf9h/vsF8fyDynt+Uplud0hIWCQdenqZdpxEjGe46g==}
+
+  node-fetch-native-with-agent@1.7.2:
+    resolution: {integrity: sha512-5MaOOCuJEvcckoz7/tjdx1M6OusOY6Xc5f459IaruGStWnKzlI1qpNgaAwmn4LmFYcsSlj+jBMk84wmmRxfk5g==}
 
   node-plop@0.26.3:
     resolution: {integrity: sha512-Cov028YhBZ5aB7MdMWJEmwyBig43aGL5WT4vdoB28Oitau1zZAcHUn8Sgfk9HM33TqhtLJ9PlM/O0Mv+QpV/4Q==}
@@ -6071,6 +6086,12 @@ snapshots:
   no-case@2.3.2:
     dependencies:
       lower-case: 1.1.4
+
+  node-appwrite@15.0.0:
+    dependencies:
+      node-fetch-native-with-agent: 1.7.2
+
+  node-fetch-native-with-agent@1.7.2: {}
 
   node-plop@0.26.3:
     dependencies:
