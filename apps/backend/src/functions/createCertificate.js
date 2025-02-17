@@ -2,7 +2,17 @@ const sdk = require("node-appwrite");
 const { PDFDocument } = require("pdf-lib");
 const QRCode = require("qrcode");
 
-module.exports = async function (req) {
+module.exports = async function (req, res) {
+  // Validate input
+  const payload = typeof req.payload === 'string' ? JSON.parse(req.payload) : req.payload;
+  
+  if (!payload || !payload.fileId || !payload.bucketId) {
+    return res.json({
+      success: false,
+      error: "Missing required parameters"
+    });
+  }
+
   const client = new sdk.Client();
   client
     .setEndpoint(process.env.APPWRITE_HOSTNAME)
@@ -13,10 +23,9 @@ module.exports = async function (req) {
 
   try {
     // Retrieve the uploaded file
-    const fileId = req.payload.$fileId;
     const file = await storage.getFileView(
-      process.env.APPWRITE_CERTIFICATE_BUCKET,
-      fileId
+      payload.bucketId,
+      payload.fileId
     );
 
     const fileBuffer = Buffer.from(await file.arrayBuffer());
@@ -76,16 +85,16 @@ module.exports = async function (req) {
       modifiedPdfFile.$id
     );
 
-    return {
+    return res.json({
       success: true,
       downloadUrl: downloadUrl.href,
       message: 'Certificate processed successfully'
-    };
+    });
   } catch (error) {
     console.error("Error processing certificate:", error);
-    return {
+    return res.json({
       success: false,
       error: error.message || "Failed to process PDF"
-    };
+    });
   }
 };

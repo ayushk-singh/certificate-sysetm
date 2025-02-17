@@ -18,13 +18,11 @@ const UploadCertificateForm = () => {
     const selectedFiles = e.target.files;
     
     if (selectedFiles) {
-      // Validate file type
       if (!selectedFiles[0].type.includes('pdf')) {
         setError('Please upload a PDF file');
         return;
       }
       
-      // Validate file size (e.g., 10MB limit)
       if (selectedFiles[0].size > 10 * 1024 * 1024) {
         setError('File size should be less than 10MB');
         return;
@@ -56,20 +54,28 @@ const UploadCertificateForm = () => {
         file
       );
 
-      // Process the certificate
+      // Process the certificate with proper payload structure
       const execution = await functions.createExecution(
         process.env.NEXT_PUBLIC_APPWRITE_CREATE_CERTIFICATE_FUNCTIONS!,
-        JSON.stringify({ $fileId: uploadedFile.$id })
+        JSON.stringify({
+          fileId: uploadedFile.$id,
+          bucketId: process.env.NEXT_PUBLIC_APPWRITE_CERTIFICATE_BUCKET
+        })
       );
 
-      // Access the response data from the execution
-      // The response is stored in the `responseBody` property for newer Appwrite versions
-      const result = JSON.parse(execution.responseBody);
+      // Handle the response more safely
+      let result;
+      try {
+        result = JSON.parse(execution.responseBody || '{}');
+      } catch (parseError) {
+        console.error('Failed to parse response:', execution.responseBody);
+        throw new Error('Invalid response from server');
+      }
 
-      if (result.success) {
+      if (result?.success) {
         setDownloadUrl(result.downloadUrl);
       } else {
-        throw new Error(result.error || 'Failed to process certificate.');
+        throw new Error(result?.error || 'Failed to process certificate.');
       }
     } catch (error) {
       console.error('Error processing certificate:', error);
