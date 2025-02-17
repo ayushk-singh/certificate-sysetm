@@ -2,7 +2,7 @@ const sdk = require("node-appwrite");
 const { PDFDocument } = require("pdf-lib");
 const QRCode = require("qrcode");
 
-module.exports = async function (req, res) {
+module.exports = async function (req) {
   const client = new sdk.Client();
   client
     .setEndpoint(process.env.APPWRITE_HOSTNAME)
@@ -45,9 +45,13 @@ module.exports = async function (req, res) {
     );
 
     const modifiedFileUrl = `https://cloud.appwrite.io/v1/storage/buckets/${process.env.APPWRITE_MODIFIED_BUCKET}/files/${modifiedPdfFile.$id}/view`;
-    res.json({ success: true, downloadUrl: modifiedFileUrl });
+
+    return {
+      success: true,
+      downloadUrl: modifiedFileUrl,
+    };
   } catch (error) {
     console.error("Error:", error);
-    res.json({ success: false, error: "Failed to process PDF" });
+    return { success: false, error: "Failed to process PDF" };
   }
 };
