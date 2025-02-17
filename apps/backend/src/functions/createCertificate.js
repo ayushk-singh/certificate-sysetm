@@ -1,4 +1,4 @@
-import sdk from "node-appwrite"; // Correctly import Appwrite SDK
+import {sdk} from "node-appwrite"; // Correctly import Appwrite SDK
 import { PDFDocument } from "pdf-lib";
 import QRCode from "qrcode";
 
