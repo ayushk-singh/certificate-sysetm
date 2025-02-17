@@ -2,26 +2,26 @@ const sdk = require("node-appwrite");
 const { PDFDocument } = require("pdf-lib");
 const QRCode = require("qrcode");
 
-module.exports = async function (req, res) {
-  // Validate input
-  const payload = typeof req.payload === 'string' ? JSON.parse(req.payload) : req.payload;
-  
-  if (!payload || !payload.fileId || !payload.bucketId) {
-    return res.json({
-      success: false,
-      error: "Missing required parameters"
-    });
-  }
-
-  const client = new sdk.Client();
-  client
-    .setEndpoint(process.env.APPWRITE_HOSTNAME)
-    .setProject(process.env.APPWRITE_PROJECT_ID)
-    .setKey(process.env.APPWRITE_API_KEY);
-
-  const storage = new sdk.Storage(client);
-
+module.exports = async function (req) {
   try {
+    // Validate input
+    const payload = typeof req.payload === 'string' ? JSON.parse(req.payload) : req.payload;
+    
+    if (!payload || !payload.fileId || !payload.bucketId) {
+      return {
+        success: false,
+        error: "Missing required parameters"
+      };
+    }
+
+    const client = new sdk.Client();
+    client
+      .setEndpoint(process.env.APPWRITE_HOSTNAME)
+      .setProject(process.env.APPWRITE_PROJECT_ID)
+      .setKey(process.env.APPWRITE_API_KEY);
+
+    const storage = new sdk.Storage(client);
+
     // Retrieve the uploaded file
     const file = await storage.getFileView(
       payload.bucketId,
@@ -85,16 +85,17 @@ module.exports = async function (req, res) {
       modifiedPdfFile.$id
     );
 
-    return res.json({
+    return {
       success: true,
       downloadUrl: downloadUrl.href,
       message: 'Certificate processed successfully'
-    });
+    };
+
   } catch (error) {
     console.error("Error processing certificate:", error);
-    return res.json({
+    return {
       success: false,
       error: error.message || "Failed to process PDF"
-    });
+    };
   }
 };

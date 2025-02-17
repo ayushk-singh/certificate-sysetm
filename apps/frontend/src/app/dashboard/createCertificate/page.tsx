@@ -54,7 +54,7 @@ const UploadCertificateForm = () => {
         file
       );
 
-      // Process the certificate with proper payload structure
+      // Process the certificate
       const execution = await functions.createExecution(
         process.env.NEXT_PUBLIC_APPWRITE_CREATE_CERTIFICATE_FUNCTIONS!,
         JSON.stringify({
@@ -63,19 +63,28 @@ const UploadCertificateForm = () => {
         })
       );
 
-      // Handle the response more safely
+      // Log the full execution response for debugging
+      console.log('Function execution response:', execution);
+
+      // Handle the response
       let result;
       try {
-        result = JSON.parse(execution.responseBody || '{}');
+        // Parse the response body if it exists
+        if (execution.responseBody) {
+          result = JSON.parse(execution.responseBody);
+        } else {
+          throw new Error('No response received from server');
+        }
       } catch (parseError) {
-        console.error('Failed to parse response:', execution.responseBody);
+        console.error('Response parsing error:', parseError);
+        console.error('Raw response:', execution.responseBody);
         throw new Error('Invalid response from server');
       }
 
       if (result?.success) {
         setDownloadUrl(result.downloadUrl);
       } else {
-        throw new Error(result?.error || 'Failed to process certificate.');
+        throw new Error(result?.error || 'Failed to process certificate');
       }
     } catch (error) {
       console.error('Error processing certificate:', error);
