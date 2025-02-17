@@ -1,4 +1,4 @@
-const { client, storage } = require('../utils/appwrite'); // Use CommonJS require
+const { client, storage } = require('node-appwrite'); // Use CommonJS require
 const { PDFDocument } = require('pdf-lib');
 const QRCode = require('qrcode');
 
