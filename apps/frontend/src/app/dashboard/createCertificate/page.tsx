@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { storage, ID } from '@/lib/appwrite'; // Assuming you have appwrite setup
-import { PDFDocument } from 'pdf-lib';
-import QRCode from 'qrcode';
+import { storage, ID, functions } from '@/lib/appwrite'; // Assuming you have appwrite setup
+
+
 
 const UploadCertificateForm = () => {
   const [files, setFiles] = useState<FileList | null>(null);
@@ -39,41 +39,21 @@ const UploadCertificateForm = () => {
       
       console.log('File uploaded:', uploadedFile);
 
-      // Retrieve the file URL from Appwrite
-      const fileURL = uploadedFile.fileId;
+      // Step 1: Trigger the Appwrite function to process the certificate
+      const response = await functions.createExecution(
+        process.env.NEXT_PUBLIC_APPWRITE_CREATE_CERTIFICATE_FUNCTIONS as string,  // The function ID you created in Appwrite
+        JSON.stringify({ $fileId: uploadedFile.$id })  // Pass the file ID to the function
+      );
 
-      // Load the PDF from the URL
-      const arrayBuffer = await fetch(fileURL).then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch PDF file");
-        return res.arrayBuffer();
-      });
+      // Step 2: Process the function response
+      const result = await response.json();
 
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
-
-      // Embed built-in font
-      const font = await pdfDoc.embedFont(PDFDocument.Font.Helvetica);
-      const pages = pdfDoc.getPages();
-
-      for (let i = 0; i < pages.length; i++) {
-        const page = pages[i];
-        const certificateId = `CERT-${Date.now() + i}`; // Example certificate ID
-
-        // Generate the QR code for the certificate ID
-        const qrCodeDataUrl = await QRCode.toDataURL(certificateId);
-        const qrImage = await pdfDoc.embedPng(qrCodeDataUrl);
-
-        // Add the certificate ID and QR code to the page
-        page.drawText(certificateId, { x: 500, y: 50, size: 12, font });
-        page.drawImage(qrImage, { x: 500, y: 80, width: 50, height: 50 });
+      if (result.success) {
+        // Step 3: Set the download URL for the generated certificate
+        setDownloadUrl(result.downloadUrl);
+      } else {
+        throw new Error('Failed to process certificate.');
       }
-
-      // Save the modified PDF
-      const modifiedPdfBytes = await pdfDoc.save();
-
-      // Convert modified PDF to a Blob to create a downloadable link
-      const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
-      const modifiedPdfUrl = URL.createObjectURL(blob);
-      setDownloadUrl(modifiedPdfUrl);
 
       alert('Certificate(s) processed successfully!');
     } catch (error) {

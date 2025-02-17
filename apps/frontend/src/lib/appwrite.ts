@@ -1,4 +1,4 @@
-import { Client, Account, Storage, ID } from "appwrite";
+import { Client, Account, Storage, Functions, ID } from "appwrite";
 
 const client = new Client()
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_HOSTNAME as string)
@@ -6,5 +6,6 @@ const client = new Client()
 
 const account = new Account(client);
 const storage = new Storage(client);
+const functions = new Functions(client);
 
-export { account, storage, ID };
+export { account, storage, ID, functions };
